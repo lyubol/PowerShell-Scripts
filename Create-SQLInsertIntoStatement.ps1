@@ -38,7 +38,7 @@ function Create-ValuesStatement{
 
 }
 
-# Read CSV file
+# Read source CSV file
 $CSVFile = Import-Csv "C:\Users\L_L\Desktop\Employees.csv"
 
 # Execute functions to get the full "INSERT" statement
