@@ -21,29 +21,38 @@ function Create-InsertStatement{
 
 }
 
+
 # Function to return the "VALUES" part of the insert statement
-function Create-ValuesStatement{
-    Write-Output "VALUES('$($CSVFile[0].Id)', '$($CSVFile[0].FirstName)', '$($CSVFile[0].LastName)', '$($CSVFile[0].Salary)'),"
-    foreach($i in 1..$($CSVFile[0].psobject.properties.name.Length))
-    {
-        foreach($LINE in $CSVFile[$i])
-        {
-            if ($i -eq $CSVFile[0].psobject.properties.name.Length) {
-                "    ('$($LINE.Id)', '$($LINE.FirstName)', '$($LINE.LastName)', '$($LINE.Salary)')"
-            }else {
-                "    ('$($LINE.Id)', '$($LINE.FirstName)', '$($LINE.LastName)', '$($LINE.Salary)'),"
-            }  
-        }
+function Create-ValuesStatement {
+    [CmdletBinding()]
+    param
+    (
+        [Parameter (Mandatory = $true, 
+            Position = 1, 
+            HelpMessage = 'The name of the variable, which points to the CSV file')] 
+        $CSVFile
+    )
+
+    Write-Output "VALUES"
+    $columnNames = @($CSVFile[0].psobject.Properties.Name)
+
+    $valuesStatements = foreach($record in $CSVFile[0..$($CSVFile[0].psobject.properties.name.Length)]){
+        $values = $columnNames.ForEach({
+            # fetch value from `$record.$_`, escape single quotes
+            "'{0}'" -f $record.$_.Replace("'","''")
+        })
+
+        # Generate insert command string
+        "($($values -join ', '))" + ","
     }
 
+    return $valuesStatements[0..$($valuesStatements.Length - 2)], $valuesStatements[-1].Substring(0,$valuesStatements[-1].Length - 1)
 }
 
+
 # Read CSV file
-$CSVFile = Import-Csv "C:\Users\L_L\Desktop\Employees.csv"
+$CSVFile = Import-Csv "C:\Users\L_L\Desktop\Employees_v2.csv" -Delimiter ","
 
 # Execute functions to get the full "INSERT" statement
 Create-InsertStatement -TableName "Employees.General"
-Create-ValuesStatement
-
-
-
+Create-ValuesStatement $CSVFile
