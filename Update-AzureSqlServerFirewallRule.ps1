@@ -5,7 +5,7 @@
     Sends a request to 'http://checkip.dyndns.org' and returns current IP address
 .EXAMPLE
     CurrentIpAddress
-.OUTPUTA
+.OUTPUTS
     System.String
 .NOTES
     Version 1
@@ -27,7 +27,7 @@ function Get-CurrentIpAddress{
     Checks Azure SQL server firewall rule and updates it if it does not match with the users' current IP address
 .EXAMPLE
     Update-AzureSqlServerFirewallRule
-.OUTPUTA
+.OUTPUTS
     System.String
 .NOTES
     Version 1
