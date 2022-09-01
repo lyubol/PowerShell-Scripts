@@ -1,4 +1,19 @@
-﻿# Function to return the "INSERT INTO" part of the insert statement
+﻿<#
+.SYNOPSIS
+    Returns INSERT INTO SQL statement
+.DESCRIPTION
+    Returns the INSERT INTO (<columns>) VALUES part of an SQL INSERT INTO statement.
+.INPUTS
+    Name of target SQL table and a variable, which points to a CSV file.
+.OUTPUTS
+    System.String
+.EXAMPLE
+    Example output: INSERT INTO Employees.General (Id, FirstName, LastName) VALUES
+.NOTES
+    Version 1
+    Developed By: Lyubomir Lirkov
+    Last Updated: 2022/08/31
+#>
 function Create-InsertStatement{
     [CmdletBinding()]
     param
@@ -6,7 +21,12 @@ function Create-InsertStatement{
         [Parameter (Mandatory = $true, 
             Position = 1, 
             HelpMessage = 'The name of the table where the data will be inserted')] 
-        [string]$TableName
+        [string]$TableName,
+
+        [Parameter (Mandatory = $true, 
+            Position = 2, 
+            HelpMessage = 'The name of the variable, which points to the CSV file')] 
+        $CSVFile
     )
 
     Write-Output "INSERT INTO $($TableName) ("
@@ -22,7 +42,22 @@ function Create-InsertStatement{
 }
 
 
-# Function to return the "VALUES" part of the insert statement
+<#
+.SYNOPSIS
+    Returns INSERT INTO SQL statement
+.DESCRIPTION
+    Returns the VALUES part of an SQL INSERT INTO statement.
+.INPUTS
+    Variable, which points to a CSV file.
+.OUTPUTS
+    System.String
+.EXAMPLE
+    Example output: ('1', 'Martyn', 'Smith')
+.NOTES
+    Version 1
+    Developed By: Lyubomir Lirkov
+    Last Updated: 2022/08/31
+#>
 function Create-ValuesStatement {
     [CmdletBinding()]
     param
@@ -36,13 +71,13 @@ function Create-ValuesStatement {
     Write-Output "VALUES"
     $columnNames = @($CSVFile[0].psobject.Properties.Name)
 
-    $valuesStatements = foreach($record in $CSVFile[0..$($CSVFile[0].psobject.properties.name.Length)]){
+    $valuesStatements = foreach($record in $CSVFile){
         $values = $columnNames.ForEach({
             # fetch value from `$record.$_`, escape single quotes
             "'{0}'" -f $record.$_.Replace("'","''")
         })
 
-        # Generate insert command string
+        # Generate string
         "($($values -join ', '))" + ","
     }
 
@@ -50,9 +85,23 @@ function Create-ValuesStatement {
 }
 
 
+
 # Read CSV file
-$CSVFile = Import-Csv "C:\Users\L_L\Desktop\Employees_v2.csv" -Delimiter ","
+$CSVFile = Import-Csv "C:\Users\L_L\Desktop\Employees.csv" -Delimiter ","
 
 # Execute functions to get the full "INSERT" statement
-Create-InsertStatement -TableName "Employees.General"
+Create-InsertStatement -TableName "Employees.General" -CSVFile $CSVFile
 Create-ValuesStatement $CSVFile
+
+<# Output:
+INSERT INTO Employees.General (
+    Id,
+    FirstName,
+    LastName)
+VALUES
+('1', 'Shayla', 'Dawson'),
+('2', 'John', 'Smith'),
+('3', 'Martin', 'James'),
+('4', 'Rowan', 'Webb'),
+('5', 'Halen', 'Glass')
+#>
